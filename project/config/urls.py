@@ -17,7 +17,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.http import HttpResponse
-from jobs.views import list_companies, create_company
 
 
 def hello(_request):
@@ -27,6 +26,5 @@ def hello(_request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', hello, name='hello'),
-    path('companies/', list_companies, name='companies-list'),
-    path('companies/create/', create_company, name='companies-create'),
+
 ]
