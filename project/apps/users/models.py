@@ -26,3 +26,31 @@ class User(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['first_name', 'last_name']
     objects = UserManager()
+
+
+class EmailVerification(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="email_verifications",
+    )
+
+    # Store hash, not raw token
+    token_hash = models.CharField(max_length=128, unique=True)
+
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveSmallIntegerField(default=0)
+
+    last_sent_at = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "expires_at"]),
+            models.Index(fields=["used_at", "expires_at"]),
+        ]
+
+    def __str__(self):
+        return f"EmailVerification(user_id={self.user_id}, used={self.used_at is not None})"
