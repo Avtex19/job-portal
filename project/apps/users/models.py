@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from apps.users.managers import UserManager
+from config import settings
 
 
 # Create your models here.
