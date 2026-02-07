@@ -5,8 +5,6 @@ class AuthResponse:
     user_id: int
     email: str
     role: str
-    access_token: str
-    refresh_token: str
     message: str = "Successful login"
 
     def to_dict(self):
@@ -17,8 +15,4 @@ class AuthResponse:
                 "email": self.email,
                 "role": self.role,
             },
-            "tokens": {
-                "access": self.access_token,
-                "refresh": self.refresh_token
-            }
         }

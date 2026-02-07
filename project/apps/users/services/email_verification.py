@@ -1,3 +1,4 @@
+import datetime
 import secrets
 import hashlib
 from django.conf import settings
@@ -9,7 +10,6 @@ from ..models import EmailVerification
 def _generate_token_payload():
     """Internal helper to keep the logic encapsulated."""
     raw = secrets.token_urlsafe(32)
-    # Using the SECRET_KEY as a 'pepper' makes the hash useless without the server config
     token_hash = hashlib.sha256((raw + settings.SECRET_KEY).encode()).hexdigest()
     return raw, token_hash
 
@@ -29,11 +29,12 @@ class VerificationService:
             # 2. Generate new credentials
             raw_token, token_hash = _generate_token_payload()
 
+
             # 3. Save to DB
             EmailVerification.objects.create(
                 user=user,
                 token_hash=token_hash,
-                expires_at=timezone.now() + timezone.timedelta(hours=24)
+                expires_at=timezone.now() + datetime.timedelta(hours=24)
             )
 
         return raw_token
