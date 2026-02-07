@@ -3,7 +3,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.users.serializers import UserRegistrationSerializer
+from apps.users.dtos.verification_response import VerificationResponse
+from apps.users.serializers import UserRegistrationSerializer, VerifyEmailSerializer
+from apps.users.services.email_verification import VerificationService
 from apps.users.services.registration import register_user, RegisterUserCommand
 
 
@@ -19,4 +21,24 @@ class RegisterAPIView(APIView):
         auth_response = register_user(cmd)
 
         return Response(auth_response.to_dict(), status=status.HTTP_201_CREATED)
+
+class VerifyEmailAPIView(APIView):
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = VerifyEmailSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        token = serializer.validated_data['token']
+
+        try:
+            tokens = VerificationService.verify_token_and_issue_jwt(token)
+        except ValueError:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        response_data = VerificationResponse.from_jwt_dict(tokens)
+
+        return Response(response_data.to_dict(), status=status.HTTP_200_OK)
+
+
 

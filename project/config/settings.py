@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+import os
 from datetime import timedelta
 from pathlib import Path
 from decouple import AutoConfig, Csv
@@ -180,3 +181,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.User'
+
+# fallback to localhost if .env is missing
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+DEFAULT_FROM_EMAIL = "noreply@yourdomain.com"
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
