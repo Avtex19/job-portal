@@ -1,4 +1,5 @@
 # apps/users/serializers.py
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from apps.users.models import User
@@ -6,7 +7,7 @@ from apps.users.models import User
 
 class UserRegistrationSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True, validators=[validate_password])
     first_name = serializers.CharField(max_length=50)
     last_name = serializers.CharField(max_length=50)
     role = serializers.ChoiceField(choices=["CANDIDATE", "EMPLOYER"])
@@ -17,4 +18,5 @@ class UserRegistrationSerializer(serializers.Serializer):
         return value.lower().strip()
 
 
-
+class VerifyEmailSerializer(serializers.Serializer):
+    token = serializers.CharField()
