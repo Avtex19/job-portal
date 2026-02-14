@@ -34,3 +34,9 @@ class UserLoginSerializer(serializers.Serializer):
 
         return attrs
 
+class LogoutSerializer(serializers.Serializer):
+
+    refresh = serializers.CharField()
+    access = serializers.CharField(required=False,allow_blank=True)
+
+
