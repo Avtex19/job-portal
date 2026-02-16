@@ -1,14 +1,18 @@
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.users.dtos.auth_response import UserAuthenticationService
 from apps.users.dtos.verification_response import VerificationResponse
-from apps.users.serializers import UserRegistrationSerializer, VerifyEmailSerializer, UserLoginSerializer
+from apps.users.serializers import UserRegistrationSerializer, VerifyEmailSerializer, UserLoginSerializer, \
+    LogoutSerializer
+from apps.users.services.blacklist import DenyBlacklistedToken
 from apps.users.services.email_verification import VerificationService
 from apps.users.services.registration import register_user, RegisterUserCommand
 from apps.users.services.tokens import make_tokens
+from .services.logout import logout_refresh_token
 
 
 # Create your views here.
@@ -69,4 +73,43 @@ class LoginAPIView(APIView):
             },
             "tokens": tokens
         }, status=status.HTTP_200_OK)
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError  # <-- Import this!
+
+from .serializers import LogoutSerializer
+
+
+class LogoutAPIView(APIView):
+    # Your permission classes are perfect!
+    permission_classes = (IsAuthenticated, DenyBlacklistedToken)
+
+    def post(self, request):
+        serializer = LogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            logout_refresh_token(serializer.validated_data['refresh'])
+
+            # FIX 1: Send a success response back to the user!
+            return Response(
+                {"message": "Successfully logged out."},
+                status=status.HTTP_200_OK
+            )
+
+        # FIX 2: Catch TokenError instead of KeyError
+        except TokenError:
+            return Response(
+                {"detail": "Token is invalid or has already been blacklisted."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+
+
 
